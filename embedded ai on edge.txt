@@ -1,0 +1,85 @@
+#include <DHT.h>
+
+// DHT22 Configuration
+#define DHTPIN 15
+#define DHTTYPE DHT22
+
+DHT dht(DHTPIN, DHTTYPE);
+
+// LEDs
+int greenLED = 18;
+int yellowLED = 19;
+int redLED = 21;
+
+void setup() {
+
+  Serial.begin(115200);
+
+  dht.begin();
+
+  pinMode(greenLED, OUTPUT);
+  pinMode(yellowLED, OUTPUT);
+  pinMode(redLED, OUTPUT);
+
+  Serial.println("Embedded AI on Edge Started");
+}
+
+void loop() {
+
+  float temperature = dht.readTemperature();
+  float humidity = dht.readHumidity();
+
+  // Check sensor reading
+  if (isnan(temperature) || isnan(humidity)) {
+    Serial.println("Failed to read DHT22");
+    return;
+  }
+
+  Serial.print("Temperature: ");
+  Serial.print(temperature);
+  Serial.print(" °C");
+
+  Serial.print(" | Humidity: ");
+  Serial.print(humidity);
+  Serial.println(" %");
+
+  // AI Decision Logic
+
+  if (temperature < 30 && humidity < 60) {
+
+    // SAFE
+
+    digitalWrite(greenLED, HIGH);
+    digitalWrite(yellowLED, LOW);
+    digitalWrite(redLED, LOW);
+
+    Serial.println("Prediction: SAFE");
+  }
+
+  else if ((temperature >= 30 && temperature <= 35) ||
+           (humidity >= 60 && humidity <= 70)) {
+
+    // WARNING
+
+    digitalWrite(greenLED, LOW);
+    digitalWrite(yellowLED, HIGH);
+    digitalWrite(redLED, LOW);
+
+    Serial.println("Prediction: WARNING");
+  }
+
+  else {
+
+    // CRITICAL
+
+    digitalWrite(greenLED, LOW);
+    digitalWrite(yellowLED, LOW);
+    digitalWrite(redLED, HIGH);
+
+    Serial.println("Prediction: CRITICAL");
+  }
+
+  Serial.println("---------------------------");
+
+  delay(2000);
+}
